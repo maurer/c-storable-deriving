@@ -15,6 +15,8 @@ Library
   Exposed-Modules:
     Foreign.CStorable
   Build-Depends: base
+  Extensions: FlexibleInstances,
+              UndecidableInstances
 
 Source-Repository HEAD
   Type:     git
