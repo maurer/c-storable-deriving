@@ -1,0 +1,21 @@
+Name:                c-storable-deriving
+Version:             0.1
+Synopsis:            Generate C-like storable instances from datatypes
+-- Description:
+-- Homepage:
+License:             BSD3
+License-File:        LICENSE
+Author:              Matthew Maurer
+Maintainer:          maurer@ugcs.caltech.edu
+Category:            Foreign
+Build-Type:          Simple
+Cabal-Version:       >=1.2
+
+Library
+  Exposed-Modules:
+    Foreign.CStorable
+  Build-Depends: base
+
+Source-Repository HEAD
+  Type:     git
+  Location: git://github.com/maurer/c-storable-deriving.git
