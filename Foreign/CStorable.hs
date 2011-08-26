@@ -5,6 +5,7 @@ module Foreign.CStorable
 import Foreign.Ptr
 import Foreign.Storable
 import GHC.Generics
+import Data.Word
 
 class GCStorable a where
   gcPeek      :: Ptr (a x)-> IO (a x)
@@ -71,7 +72,7 @@ class CStorable a where
   default cSizeOf    :: (Generic a, GCStorable (Rep a)) => a -> Int
   cSizeOf            = gcAlignment . from
 
-instance (Storable a) => CStorable a where
+instance CStorable Word64 where
   cPeek      = peek
   cPoke      = poke
   cAlignment = alignment
