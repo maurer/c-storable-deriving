@@ -72,6 +72,12 @@ class CStorable a where
   default cSizeOf    :: (Generic a, GCStorable (Rep a)) => a -> Int
   cSizeOf            = gcAlignment . from
 
+instance CStorable Word64 where
+  cPeek      = peek
+  cPoke      = poke
+  cAlignment = alignment
+  cSizeOf    = sizeOf
+
 newtype StorableWrap a = Storable a
 instance (Storable a) => CStorable (StorableWrap a) where
   cPeek p                 = fmap Storable $ peek (castPtr p)
