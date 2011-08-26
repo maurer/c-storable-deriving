@@ -14,9 +14,14 @@ Cabal-Version:       >=1.2
 Library
   Exposed-Modules:
     Foreign.CStorable
-  Build-Depends: base
+  Build-Depends: base,
+                 ghc-prim
   Extensions: FlexibleInstances,
-              UndecidableInstances
+              UndecidableInstances,
+              ScopedTypeVariables,
+              TypeOperators,
+              DefaultSignatures,
+              FlexibleContexts
 
 Source-Repository HEAD
   Type:     git
