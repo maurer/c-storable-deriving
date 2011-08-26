@@ -14,13 +14,17 @@ Cabal-Version:       >=1.2
 Library
   Exposed-Modules:
     Foreign.CStorable
+  Other-Modules:
+    Foreign.CStorable.TypeClass
+    Foreign.CStorable.BaseInstances
   Build-Depends: base,
                  ghc-prim
   Extensions: FlexibleInstances,
               ScopedTypeVariables,
               TypeOperators,
               DefaultSignatures,
-              FlexibleContexts
+              FlexibleContexts,
+              CPP
 
 Source-Repository HEAD
   Type:     git
