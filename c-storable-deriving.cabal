@@ -19,7 +19,7 @@ Library
   Other-Modules:
     Foreign.CStorable.TypeClass
     Foreign.CStorable.BaseInstances
-  Build-Depends: base,
+  Build-Depends: base < 5,
                  ghc-prim
   Extensions: FlexibleInstances,
               ScopedTypeVariables,
