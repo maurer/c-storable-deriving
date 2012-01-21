@@ -1,12 +1,13 @@
 Name:                c-storable-deriving
 Version:             0.1
 Synopsis:            Generate C-like storable instances from datatypes
--- Description:
--- Homepage:
+Description:         Automatically generates struct-rule based Storable
+                     instances based on the Generic typeclass.
+Homepage:            https://github.com/maurer/c-storable-deriving
 License:             BSD3
 License-File:        LICENSE
 Author:              Matthew Maurer
-Maintainer:          maurer@ugcs.caltech.edu
+Maintainer:          maurer@matthewmaurer.org
 Category:            Foreign
 Build-Type:          Simple
 Cabal-Version:       >=1.2
