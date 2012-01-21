@@ -10,7 +10,8 @@ Author:              Matthew Maurer
 Maintainer:          maurer@matthewmaurer.org
 Category:            Foreign
 Build-Type:          Simple
-Cabal-Version:       >=1.2
+Cabal-Version:       >=1.6
+Tested-With:         GHC ==7.2.1
 
 Library
   Exposed-Modules:
@@ -23,7 +24,6 @@ Library
   Extensions: FlexibleInstances,
               ScopedTypeVariables,
               TypeOperators,
-              DefaultSignatures,
               FlexibleContexts,
               CPP
 

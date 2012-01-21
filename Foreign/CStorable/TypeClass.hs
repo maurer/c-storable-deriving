@@ -1,3 +1,4 @@
+{-# LANGUAGE DefaultSignatures #-}
 module Foreign.CStorable.TypeClass where
 
 import Foreign.Ptr
