@@ -1,3 +1,4 @@
+-- | Provides lots of bas instances, pulled over from `Storable'.
 module Foreign.CStorable.BaseInstances where
 
 import Data.Word

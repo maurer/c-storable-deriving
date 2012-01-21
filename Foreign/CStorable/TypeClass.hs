@@ -1,10 +1,15 @@
 {-# LANGUAGE DefaultSignatures #-}
+-- | This module provides the mechanical deriving
+--   mechanism for `CStorable'.
 module Foreign.CStorable.TypeClass where
 
 import Foreign.Ptr
 import Foreign.Storable
 import GHC.Generics
 
+-- | A wrapper class for the raw autoderivation functions,
+--   representing twhat is necessary for the defaulted
+--   `CStorable' methods.
 class GCStorable a where
   gcPeek      :: Ptr (a x)-> IO (a x)
   gcPoke      :: Ptr (a x) -> a x -> IO ()
@@ -17,15 +22,20 @@ instance GCStorable U1 where
   gcAlignment _ = 0
   gcSizeOf _    = 0
 
+-- | Calculates extra space between two items based on alignment
+--   and size.
 padding :: (GCStorable a, GCStorable b) => a x -> b y -> Int
 padding a b = let
   sizeA   = gcSizeOf a
   alignB  = gcAlignment b
   in ((alignB - sizeA) `mod` alignB)
 
+-- | Calculates the total space consumed by a given element, including
+--   alignment padding.
 offset :: (GCStorable a, GCStorable b) => a x -> b y -> Int
 offset a b = padding a b + gcSizeOf a
 
+-- | Test
 instance (GCStorable a, GCStorable b) => GCStorable (a :*: b) where
   gcPeek p = do
     a <- gcPeek $ castPtr p
@@ -53,6 +63,8 @@ instance (CStorable a) => GCStorable (K1 i a) where
   gcAlignment (K1 x) = cAlignment x
   gcSizeOf (K1 x)    = cSizeOf x
 
+-- | This typeclass is basically just a duplicate of `Storable'. It exists
+--   because I can't easily modify `Storable', as it is part of base.
 class CStorable a where
   cPeek              :: Ptr a -> IO a
   default cPeek      :: (Generic a, GCStorable (Rep a)) => Ptr a -> IO a
