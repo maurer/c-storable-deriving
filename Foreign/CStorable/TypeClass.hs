@@ -80,4 +80,4 @@ class CStorable a where
 
   cSizeOf            :: a -> Int
   default cSizeOf    :: (Generic a, GCStorable (Rep a)) => a -> Int
-  cSizeOf            = gcAlignment . from
+  cSizeOf            = gcSizeOf . from
