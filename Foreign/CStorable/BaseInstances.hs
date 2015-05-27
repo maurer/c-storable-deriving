@@ -57,6 +57,8 @@ C(CChar)
 C(IntPtr)
 C(WordPtr)
 C(Fd)
+
+#ifndef mingw32_HOST_OS
 C(CRLim)
 C(CTcflag)
 C(CSpeed)
@@ -64,6 +66,8 @@ C(CCc)
 C(CUid)
 C(CNlink)
 C(CGid)
+#endif
+
 C(CSsize)
 C(CPid)
 C(COff)
