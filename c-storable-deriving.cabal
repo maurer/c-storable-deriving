@@ -1,5 +1,5 @@
 Name:                c-storable-deriving
-Version:             0.1.1
+Version:             0.1.2
 Synopsis:            Generate C-like storable instances from datatypes
 Description:         Automatically generates struct-rule based Storable
                      instances based on the Generic typeclass.
