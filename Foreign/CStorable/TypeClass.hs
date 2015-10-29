@@ -11,68 +11,65 @@ import GHC.Generics
 --   representing twhat is necessary for the defaulted
 --   `CStorable' methods.
 class GCStorable a where
-  gcPeek      :: Ptr (a x)-> IO (a x)
-  gcPoke      :: Ptr (a x) -> a x -> IO ()
   gcAlignment :: a x -> Int
-  gcSizeOf    :: a x -> Int
+  gcPeek      :: Int -> Ptr (a x)-> IO (a x)
+  gcPoke      :: Int -> Ptr (a x) -> a x -> IO ()
+  gcSizeOf    :: Int -> a x -> Int
+
+  -- padding before the field to align from the given offset
+  gcPadding   :: Int -> a x -> Int
+  gcPadding off a = (gcAlignment a - off) `mod` gcAlignment a
 
 instance GCStorable U1 where
-  gcPeek _      = return U1
-  gcPoke _ _    = return ()
   gcAlignment _ = 0
-  gcSizeOf _    = 0
-
--- | Calculates extra space between two items based on alignment
---   and size.
-padding :: (GCStorable a, GCStorable b) => a x -> b y -> Int
-padding a b = let
-  sizeA   = gcSizeOf a
-  alignB  = gcAlignment b
-  in ((alignB - sizeA) `mod` alignB)
-
--- | Calculates the total space consumed by a given element, including
---   alignment padding.
-offset :: (GCStorable a, GCStorable b) => a x -> b y -> Int
-offset a b = padding a b + gcSizeOf a
+  gcPeek _ _    = return U1
+  gcPoke _ _ _  = return ()
+  gcSizeOf _ _  = 0
+  gcPadding _ _ = 0
 
 -- | Test
 instance (GCStorable a, GCStorable b) => GCStorable (a :*: b) where
-  gcPeek p = do
-    a <- gcPeek $ castPtr p
-    b <- gcPeek $ castPtr p `plusPtr` offset a (undefined :: b x)
-    return $ a :*: b
-  gcPoke p (a :*: b) = do
-    gcPoke (castPtr p) a
-    gcPoke (castPtr (p `plusPtr` offset a b)) b
   gcAlignment _ = lcm (gcAlignment (undefined :: a x))
                       (gcAlignment (undefined :: b y))
-  gcSizeOf _    = let
+
+  gcPeek off p = do
+    a <- gcPeek off                    $ castPtr p
+    b <- gcPeek (off + gcSizeOf off a) $ castPtr p
+    return $ a :*: b
+
+  gcPoke off p (a :*: b) = do
+    gcPoke off                    (castPtr p) a
+    gcPoke (off + gcSizeOf off a) (castPtr p) b
+
+  gcSizeOf off _    = let
     a = undefined :: a x
     b = undefined :: b y
-    in gcSizeOf a + gcSizeOf b + padding a b
+    off2 = off + gcSizeOf off a
+    in gcSizeOf off a + gcSizeOf off2 b
 
 instance (GCStorable a) => GCStorable (M1 i c a) where
-  gcPeek p           = fmap M1 $ gcPeek (castPtr p)
-  gcPoke p (M1 x)    = gcPoke (castPtr p) x
-  gcAlignment (M1 x) = gcAlignment x
-  gcSizeOf (M1 x)    = gcSizeOf x
+  gcAlignment (M1 x)     = gcAlignment x
+  gcPeek off p           = fmap M1 $ gcPeek off (castPtr p)
+  gcPoke off p (M1 x)    = gcPoke off (castPtr p) x
+  gcSizeOf off (M1 x)    = gcSizeOf off x
+  gcPadding off (M1 x)   = gcPadding off x
 
 instance (CStorable a) => GCStorable (K1 i a) where
-  gcPeek p           = fmap K1 $ cPeek (castPtr p)
-  gcPoke p (K1 x)    = cPoke (castPtr p) x
-  gcAlignment (K1 x) = cAlignment x
-  gcSizeOf (K1 x)    = cSizeOf x
+  gcAlignment (K1 x)     = cAlignment x
+  gcPeek off p           = fmap K1 $ cPeek (castPtr p `plusPtr` (off + gcPadding off (undefined :: K1 i a x)))
+  gcPoke off p (K1 x)    = cPoke (castPtr p `plusPtr` (off + gcPadding off (undefined :: K1 i a x))) x
+  gcSizeOf off (K1 x)    = gcPadding off (undefined :: K1 i a x) + cSizeOf x
 
 -- | This typeclass is basically just a duplicate of `Storable'. It exists
 --   because I can't easily modify `Storable', as it is part of base.
 class CStorable a where
   cPeek              :: Ptr a -> IO a
   default cPeek      :: (Generic a, GCStorable (Rep a)) => Ptr a -> IO a
-  cPeek p            = fmap to $ gcPeek (castPtr p)
+  cPeek p            = fmap to $ gcPeek 0 (castPtr p)
 
   cPoke              :: Ptr a -> a -> IO ()
   default cPoke      :: (Generic a, GCStorable (Rep a)) => Ptr a -> a -> IO ()
-  cPoke p x          = gcPoke (castPtr p) $ from x
+  cPoke p x          = gcPoke 0 (castPtr p) $ from x
 
   cAlignment         :: a -> Int
   default cAlignment :: (Generic a, GCStorable (Rep a)) => a -> Int
@@ -80,4 +77,4 @@ class CStorable a where
 
   cSizeOf            :: a -> Int
   default cSizeOf    :: (Generic a, GCStorable (Rep a)) => a -> Int
-  cSizeOf            = gcSizeOf . from
+  cSizeOf            = gcSizeOf 0 . from
