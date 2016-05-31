@@ -8,8 +8,11 @@ import Foreign.Storable
 import GHC.Generics
 
 -- | A wrapper class for the raw autoderivation functions,
---   representing twhat is necessary for the defaulted
+--   representing what is necessary for the defaulted
 --   `CStorable' methods.
+--
+-- No @(':+:')@ instance.
+--
 class GCStorable a where
   gcAlignment :: a x -> Int
   gcPeek      :: Int -> Ptr (a x)-> IO (a x)
@@ -61,7 +64,52 @@ instance (CStorable a) => GCStorable (K1 i a) where
   gcSizeOf off (K1 x)    = gcPadding off (undefined :: K1 i a x) + cSizeOf x
 
 -- | This typeclass is basically just a duplicate of `Storable'. It exists
---   because I can't easily modify `Storable', as it is part of base.
+-- because I can't easily modify `Storable', as it is part of base.
+-- The difference (besides naming) is the use of @DefaultSignatures@, with
+-- implementations provided by the (internal class) 'GCStorable'.
+--
+-- Example:
+--
+-- @
+-- {-\# LANGUAGE <https://ocharles.org.uk/blog/posts/2014-12-16-derive-generic.html DeriveGeneric>, <http://dev.stephendiehl.com/hask/#deriveanyclass DeriveAnyClass> \#-}
+--
+-- import 'Foreign' (Storable(..))
+-- import Foreign.CStorable (CStorable(..))
+--
+-- --| a two-dimensional point.
+-- -- Compatible with both OSX's @CGPoint@ and Window's @POINT@.
+-- data Point = Point
+--  { x :: Double
+--  , y :: Double
+--  } deriving ('Generic','CStorable')
+--
+-- instance 'Storable' Point where
+--  'peek'      = 'cPeek'
+--  'poke'      = 'cPoke'
+--  'alignment' = 'cAlignment'
+--  'sizeOf'    = 'cSizeOf'
+-- @
+--
+-- Or without @-XDeriveAnyClass@:
+--
+-- @
+-- ...
+--  } deriving (Generic)
+-- instance CStorable Point
+-- ..
+-- @
+--
+-- the @Storable@ instance is equivalent to:
+--
+-- @
+-- struct Point {
+--     double x;
+--     double y;
+-- };
+-- @
+--
+-- Only product types are supported (i.e. no @union@).
+--
 class CStorable a where
   cPeek              :: Ptr a -> IO a
   default cPeek      :: (Generic a, GCStorable (Rep a)) => Ptr a -> IO a
