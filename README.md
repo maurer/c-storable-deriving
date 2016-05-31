@@ -7,6 +7,7 @@ This library is intended to make generating C-like storable instances from datat
 ```haskell
 {-# LANGUAGE DeriveGeneric, DeriveAnyClass #-}
 
+import GHC.Generics (Generic(..))
 import Foreign (Storable(..))
 import Foreign.CStorable (CStorable(..))
 
@@ -15,7 +16,7 @@ import Foreign.CStorable (CStorable(..))
 data Point = Point
  { x :: Double
  , y :: Double
- } deriving (Generic,CStorable)
+ } deriving (Generic, CStorable)
 
 instance Storable Point where
  peek      = cPeek

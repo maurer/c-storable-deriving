@@ -73,6 +73,7 @@ instance (CStorable a) => GCStorable (K1 i a) where
 -- @
 -- {-\# LANGUAGE <https://ocharles.org.uk/blog/posts/2014-12-16-derive-generic.html DeriveGeneric>, <http://dev.stephendiehl.com/hask/#deriveanyclass DeriveAnyClass> \#-}
 --
+-- import GHC.Generics (Generic(..))
 -- import 'Foreign' (Storable(..))
 -- import Foreign.CStorable (CStorable(..))
 --
@@ -81,7 +82,7 @@ instance (CStorable a) => GCStorable (K1 i a) where
 -- data Point = Point
 --  { x :: Double
 --  , y :: Double
---  } deriving ('Generic','CStorable')
+--  } deriving ('Generic', 'CStorable')
 --
 -- instance 'Storable' Point where
 --  'peek'      = 'cPeek'
